@@ -1,0 +1,576 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bgs.ssm.mapper.UserMapper">
+    <!-- 用户登录 -->
+    <select id="selectUser" resultType="user">
+		select * from user where user_name = #{userName} and password = #{password}
+	</select>
+
+
+
+    <!--用户权限设置父节点-->
+    <select id="selectUseQuanXian" resultType="Relation">
+        SELECT me.id,re.role_id roleId,re.menu_id menuId,re.url,re.quanxian,me.menu_name menuName,me.pid as pId FROM relation re
+        INNER JOIN menu me INNER JOIN role ro
+        ON re.menu_id=me.id
+        AND re.role_id=ro.id
+        WHERE re.role_id=#{id}
+    </select>
+
+
+    <!--用户权限设置子节点-->
+    <select id="selectUseQuanXian1" resultType="Relation">
+        SELECT re.id, me.menu_name,me.pid,me.url
+        FROM relation re, menu me,role ro
+        WHERE
+        re.menu_id=me.id
+        AND re.role_id=ro.id
+        and me.pid=#{pId}
+    </select>
+
+
+    <!--*****************************************************************************角色管理******************************************************************-->
+
+    <!--角色管理查询-->
+    <select id="JueSeQuanXian" resultType="Role">
+        select id,role_name roleName,role_sort roleSort from role
+    </select>
+
+
+    <!--角色管理添加-->
+    <insert id="addRole">
+        insert into role(role_name,role_sort)values(#{roleName},#{roleSort})
+    </insert>
+
+
+    <!--角色管理删除-->
+    <delete id="deleteRole">
+        delete from role where id = #{id}
+    </delete>
+
+
+    <!--角色管理删除-->
+    <update id="xiugaiRole">
+        update role set role_name = #{roleName},role_sort=#{roleSort} where id=#{id}
+    </update>
+
+
+
+<!--*********************************************************************用户管理**************************************************************************-->
+
+
+
+    <!--用户管理的查询-->
+    <select id="YongHuQuanXian" resultType="user">
+        SELECT us.id,us.user_name userName, us.all_name allName,us.telphone,
+                     de.dept_name deptName,ro.role_name roleName
+        FROM user us INNER JOIN dept de INNER JOIN role ro
+                ON us.dept_id = de.id AND us.role_id = ro.id
+
+        <where>
+            <if test="userName!=null and userName!=''">
+                user_name like '%${userName}%'
+            </if>
+            <if test="allName!=null and allName!=''">
+                and all_name like '%${allName}%'
+            </if>
+            <if test="telphone!=null and telphone!=''">
+                and telphone like '%${telphone}%'
+            </if>
+            <if test="deptId!=null and deptId!=''">
+                and dept_id like '%${deptId}%'
+            </if>
+        </where>
+    </select>
+
+
+    <!--用户管理(添加下拉框的部门的数据回显)-->
+    <select id="selectDept" resultType="dept">
+        select id,dept_name deptName from dept
+    </select>
+
+    <!--用户管理(添加下拉框的角色的数据回显)-->
+    <select id="selectRole" resultType="role">
+        select id,role_name roleName from role
+    </select>
+
+
+    <!--添加-->
+    <insert id="addYongHu" >
+        insert into user(id,user_name,password,all_name,role_id,telphone,email,dept_id,introduce)
+        values(null,#{userName},#{password},#{allName},#{roleId},#{telphone},#{email},#{deptId},#{introduce})
+    </insert>
+
+    <!--用户管理的删除操作-->
+      <delete id="deleteYongHu">
+         delete from user where id=#{id}
+      </delete>
+
+    <!--用户管理的修改单查-->
+    <select id="DanChaYongHu" resultType="user">
+    select * from user where id =#{id}
+  </select>
+
+    <select id="DanChaYongHu1" resultType="user">
+        select * from user where id =#{id}
+    </select>
+
+
+    <!--用户管理的修改操作-->
+    <update id="updateYongHu">
+        update user set user_name=#{userName},all_name=#{allName},role_id=#{roleId},telphone=#{telphone},email=#{email},dept_id=#{deptId},introduce=#{introduce} where id=#{id}
+    </update>
+
+
+
+
+
+
+    <!--*********************************************************************部门管理**************************************************************************-->
+
+    <!--全查和模糊查-->
+    <select id="BuMenQuanXian" resultType="dept">
+        select * from dept
+        <where>
+            <if test="deptName!='' and deptName!=null">
+                dept_name like '%${deptName}%'
+            </if>
+            <if test="contact!='' and contact!=null">
+               and contact like '%${contact}%'
+            </if>
+            <if test="contactphone!='' and contactphone!=null">
+               and contactphone like '%${contactphone}%'
+            </if>
+        </where>
+    </select>
+
+
+    <!--删除-->
+    <delete id="deleteBuMen">
+        delete from dept where id=#{id}
+    </delete>
+
+
+    <!--回显部门信息-->
+    <select id="selectDeptHuiXian" resultType="dept">
+        select * from dept
+    </select>
+
+
+    <!--添加部门管理addDept-->
+    <insert id="addDept">
+        insert into dept(id,dept_name,contact,contactphone,introduce,pid,paixu)
+        values(null,#{deptName},#{contact},#{contactphone},#{introduce},#{pid},#{paixu})
+    </insert>
+
+
+    <!--部门管理修改的单查-->
+    <select id="DanChaBuMen" resultType="dept">
+        select *from dept where id=#{id}
+    </select>
+
+
+    <!--部门管理的修改-->
+    <update id="updateBuMen">
+        update dept set dept_name=#{deptName},contact=#{contact},contactphone=#{contactphone},introduce=#{introduce},pid=#{pid} where id=#{id}
+    </update>
+
+
+
+
+
+    <!--*********************************************************************部门管理**************************************************************************-->
+
+    <!--规格管理的全查和模糊查-->
+    <select id="GuiGeQuanXian" resultType="product">
+        select * from product
+        <where>
+            <if test="bianma!='' and bianma!=null">
+                bianma like '%${bianma}%'
+            </if>
+            <if test="productName!='' and productName!=null">
+                and product_name like '%${productName}%'
+            </if>
+            <if test="productSize!='' and productSize!=null">
+                and product_size like '%${productSize}%'
+            </if>
+            <if test="productStatus!='' and productStatus!=null">
+                and product_status like '%${productStatus}%'
+            </if>
+        </where>
+    </select>
+
+
+    <!--规格管理的添加-->
+    <insert id="addGuiGe">
+        insert into product(product_name,product_size,oilproduct_name,oilproduct_size,testunit,testway,bianma)
+        values(#{productName},#{productSize},#{oilproductName},#{oilproductSize},#{testunit},#{testway},#{bianma})
+    </insert>
+
+
+    <!--规格管理的删除-->
+    <delete id="deleteGuiGe">
+        delete from product where id=#{id}
+    </delete>
+
+
+    <!--规格管理的修改-->
+    <update id="updateGuiGe">
+        update product set
+        product_name=#{productName},product_size=#{productSize},oilproduct_name=#{oilproductName},oilproduct_size=#{oilproductSize},
+            testunit=#{testunit},testway=#{testway},bianma=#{bianma} where id=#{id}
+    </update>
+
+
+
+    <!--修改的单查-->
+    <select id="DanChaGuiGe" resultType="product">
+        select * from product where id=#{id}
+    </select>
+
+
+    <!--审核-->
+    <select id="selectStatus" resultType="product">
+        select product_status as productStatus from product
+    </select>
+
+
+    <!--修改审核状态-->
+    <update id="XiuGaiStatus">
+        update product set product_status=#{productStatus} where id=#{id}
+    </update>
+
+
+    <!--订单管理下拉框数据查询-->
+    <select id="HuiXianDingDanManager2" resultType="customer">
+        SELECT id,customer_name customerName FROM customer
+    </select>
+    <select id="HuiXianDingDanManager3" resultType="dept">
+        SELECT id,dept_name deptName from dept
+    </select>
+    <select id="HuiXianDingDanManager4" resultType="user">
+        SELECT id,all_name allName from user
+    </select>
+
+
+
+    <!--订单管理的全查-->
+    <select id="DingDanQuanXian" resultType="dingDan">
+        SELECT dd.id AS id,ddi.id AS ddiid,dd.order_empno orderEmpno,dd.order_name orderName,dd.order_date orderDate,cu.customer_name customerName,dd.order_status orderStatus,
+        p.product_name productName,p.product_size productSize,p.testunit ,ddi.info_number infoNumber
+        FROM dingdaninfo ddi INNER JOIN customer cu INNER JOIN product p INNER JOIN dingdan dd
+        ON dd.customer_id=cu.id
+        AND ddi.dingdaninfo_id=dd.id
+        AND ddi.product_id=p.id
+        <where>
+            <if test="orderStatus!='' and orderStatus!=null">
+                order_status like '%${orderStatus}%'
+            </if>
+            <if test="customerId!='' and customerId!=null">
+                and customer_id like '%${customerId}%'
+            </if>
+            <if test="deptId!='' and deptId!=null">
+                and dept_id like '%${deptId}%'
+            </if>
+            <if test="userId!='' and userId!=null">
+                and user_id like '%${userId}%'
+            </if>
+            <if test="orderName!='' and orderName!=null">
+                and order_name like '%${orderName}%'
+            </if>
+            <if test="orderEmpno!='' and orderEmpno!=null">
+                and order_empno like '%${orderEmpno}%'
+            </if>
+            <if test="orderDate!='' and orderDate!=null">
+                and order_date like '%${orderDate}%'
+            </if>
+        </where>
+             GROUP BY dd.id
+    </select>
+
+
+
+    <!--订单管理的单查-->
+    <select id="selectDingDanCha" resultType="DingDanInfo">
+        SELECT * from  dingdaninfo ddi INNER JOIN product p ON ddi.product_id=p.id
+        WHERE ddi.product_id=#{dingDanInfo.id}
+    </select>
+
+
+    <!--订单管理的详情操作-->
+    <select id="DingDanXiangQing" resultType="DingDan">
+        SELECT dd.id,dd.order_status orderStatus,dd.order_empno orderEmpno,ddi.info_willrenumber infoWillrenumber,
+                     dd.receive_phone receivePhone,dd.receive_chuanzhen receiveChuanzhen,dd.receive_beizhu receiveBeizhu,
+            dd.send_dept sendDept,dd.send_people sendPeople,dd.send_riqi sendRiqi,dd.send_phone sendPhone,dd.send_chuanzhen sendChuanzhen,dd.beizhu,dd.tupian,
+                     u.all_name allName,d.dept_name deptName,c.customer_name customerName
+        FROM dingdan dd INNER JOIN customer c INNER JOIN dept d INNER JOIN user u INNER JOIN dingdaninfo ddi
+                ON dd.customer_id=c.id AND dd.dept_id=d.id AND dd.user_id=u.id
+        WHERE dd.id=#{dingdan.id} GROUP BY dd.id
+    </select>
+
+
+    <!--订单确认的删除-->
+    <delete id="deleteDingDan">
+        delete from dingdan where id=#{dingdan.id}
+    </delete>
+
+
+    <!--订单确认的添加-->
+    <insert id="TianJiaDingDan" keyProperty="com.bgs.ssm.pojo.DingDan">
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            select  last_insert_ID()
+        </selectKey>
+        insert into dingdan(order_empno,customer_id,dept_id,receive_phone,user_id,order_status,receive_chuanzhen,receive_beizhu,send_dept,send_people,send_riqi,send_phone,send_chuanzhen,beizhu)
+        values(#{orderEmpno},#{customerId},#{deptId},#{receivePhone},#{userId},#{orderStatus},#{receiveChuanzhen},#{receiveBeizhu},#{sendDept},#{sendPeople},#{sendRiqi},#{sendPhone},#{sendChuanzhen},#{beizhu})
+    </insert>
+
+    <insert id="TianJiaDingDanInfo">
+        insert into dingdaninfo(id,info_time,info_number,dingdaninfo_id,product_id) values(0,#{infoTime},#{infoNumber},#{dingdid},#{dingdid})
+    </insert>
+
+
+    <!--订单确认的修改操作-->
+    <update id="XiuGaiDingDan">
+        update dingdan set order_empno=#{orderEmpno},customer_id=#{customerId},dept_id=#{deptId},receive_phone=#{receivePhone},user_id=#{userId},
+            order_status=#{orderStatus},receive_chuanzhen=#{receiveChuanzhen},receive_beizhu=#{receiveBeizhu},send_dept=#{sendDept},
+            send_people=#{sendPeople},send_riqi=#{sendRiqi},send_phone=#{sendPhone},send_chuanzhen=#{sendChuanzhen},beizhu=#{beizhu}
+            where id=#{id}
+    </update>
+    <!--修改的确认按钮-->
+    <update id="XiuGaiQueRen">
+        update dingdaninfo set info_allrenumber=#{infoAllrenumber},info_willrenumber=#{infoWillrenumber},info_time=#{infoTime} where id=#{id}
+    </update>
+    <!--订单信息的修改-->
+    <update id="updateDingDanXinXi">
+        update dingdaninfo set info_time=#{infoTime},info_allrenumber=#{infoAllrenumber},info_willrenumber=#{infoWillrenumber} where id=#{id}
+    </update>
+
+
+    <!--订单确认的完成操作-->
+    <update id="dingdanWanCheng">
+        update dingdan set order_status='已结束' where id=#{dingdan.id}
+    </update>
+
+    <!--编码的查询-->
+    <select id="selectBianMa" resultType="product">
+        select * from product;
+    </select>
+
+
+
+    <select id="loadProperty" resultType="product">
+        select *from product where id=#{product.id}
+    </select>
+
+    <select id="loadProperty2" resultType="product">
+        select p.*,ddi.* from product p INNER JOIN dingdaninfo ddi ON p.id=ddi.product_id where ddi.id=#{product.id}
+    </select>
+
+
+
+
+
+  <!-- 订单信息的修改回显-->
+    <select id="xiugaiDingDanDanCha" resultType="dingDanInfo">
+        SELECT ddi.id,ddi.product_id productId,ddi.dingdaninfo_id dingdaninfoId,p.bianma,p.product_size productSize,p.testunit,
+                      ddi.info_time infoTime,ddi.info_number infoNumber,
+                      ddi.info_allrenumber infoAllrenumber,
+                      ddi.info_willrenumber infoWillrenumber,p.kucun,p.erpkucun
+        FROM dingdaninfo ddi INNER JOIN product p ON ddi.product_id = p.id
+        WHERE ddi.dingdaninfo_id=#{id}
+    </select>
+
+
+
+    <!--修改的删除-->
+    <delete id="XiuGaiShanChu">
+        delete from dingdaninfo where product_id=#{dingDanInfo.id}
+    </delete>
+
+
+
+
+    <!--排产计划的全查-->
+    <select id="quanchaPlan" resultType="Schedulingplan">
+        SELECT s.id,s.dingdan_id dingdanId,d.order_empno orderEmpno,c.customer_name customerName,d.send_riqi sendRiqi,
+        d.order_status orderStatus,s.plan_empno planEmpno
+        from schedulingplan s
+        INNER JOIN dingdan d
+        INNER JOIN customer c
+        ON s.dingdan_id=d.id
+        AND d.customer_id=c.id
+        <where>
+            <if test="orderStatus!='' and orderStatus!=null">
+                order_status like '%${orderStatus}%'
+            </if>
+            <if test="customerId!='' and customerId!=null">
+                and customer_id like '%${customerId}%'
+            </if>
+            <if test="deptId!='' and deptId!=null">
+                and dept_id like '%${deptId}%'
+            </if>
+            <if test="userId!='' and userId!=null">
+                and user_id like '%${userId}%'
+            </if>
+            <if test="orderEmpno!='' and orderEmpno!=null">
+                and order_empno like '%${orderEmpno}%'
+            </if>
+            <if test="planEmpno!='' and planEmpno!=null">
+                and plan_empno like '%${planEmpno}%'
+            </if>
+        </where>
+    </select>
+
+
+    <select id="selectDingdanEmpno" resultType="dingdan">
+        select id,order_empno orderEmpno from dingdan
+    </select>
+
+
+    <insert id="XinZengPaiChan">
+
+        <selectKey resultType="java.lang.Integer" order="AFTER" keyProperty="id">
+            select  last_insert_ID()
+        </selectKey>
+          insert into schedulingplan values(0,#{planEmpno},#{id})
+    </insert>
+
+    <insert id="XinZengPiCi">
+        insert into batch values (0,#{batchEmpno},#{batchName},#{id})
+    </insert>
+
+    <select id="PiCiHuiXian" resultType="batch">
+        select id,batch_empno batchEmpno,batch_name batchName from batch where batch_id=#{batch.id}
+    </select>
+
+
+    <select id="GenZongHaoHuiXian" resultType="Schedulingplan">
+        SELECT s.id, d.order_empno orderEmpno,s.dingdan_id dingdanId
+          from schedulingplan s INNER JOIN dingdan d ON s.dingdan_id=d.id
+          WHERE s.dingdan_id=#{id}
+    </select>
+
+    <delete id="shanChuPiCi">
+        delete from batch where id=#{batch.id}
+    </delete>
+
+
+    <select id="GuanLianSelect" resultType="batch">
+        select b.id,b.batch_empno batchEmpno,b.batch_name batchName
+        FROM batch b INNER JOIN schedulingplan s
+                ON b.batch_id=s.id
+    </select>
+
+
+    <select id="selectProductionInfo" resultType="productioninformation">
+        select
+            p.id pId,pd.id,p.bianma,p.product_size productSize,p.testunit,
+            ddi.info_number infoNumber,
+            pd.production_num productionNum
+
+        FROM productioninformation pd
+            INNER JOIN dingdaninfo ddi
+            INNER JOIN product p
+            INNER JOIN batch b
+
+                ON pd.dingdaninfo_id=ddi.id AND
+                   pd.id=p.production_id AND
+                   pd.productioninformation_id=b.id
+            where b.id=#{id}
+    </select>
+
+
+    <delete id="removeProductionInfo">
+        delete from  productioninformation where id=#{id}
+    </delete>
+
+    <select id="selectgenjinInfo" resultType="followup">
+        SELECT * from followup f INNER JOIN productioninformation p
+                ON f.followup_id = p.id
+        where p.id=#{id}
+    </select>
+
+    <delete id="removeGenJinInfo">
+        delete from followup where id=#{id}
+    </delete>
+
+    <insert id="QueDingXiuGaiPiCi">
+        insert into batch(batch_empno,batch_name,batch_id) values(#{batchEmpno},#{batchName},#{batchId})
+    </insert>
+
+
+    <select id="QuanHuiXian" resultType="batch">
+        select * FROM batch WHERE batch_id=#{batchId}
+    </select>
+
+
+
+   <update id="xiugaiXinXi">
+       update batch set batch_empno = #{batchEmpno},batch_name=#{batchName} where id=#{id}
+   </update>
+
+
+
+    <insert id="tianjiaXinXi">
+        insert into batch(batch_empno,batch_name,batch_id) values(#{batchEmpno},#{batchName},#{batchId})
+    </insert>
+
+
+
+    <select id="LianChaXinZengPanDuan" resultType="schedulingplan">
+        select s.id,s.dingdan_id dingdanId FROM schedulingplan s
+            INNER JOIN dingdan d ON s.dingdan_id=d.id
+    </select>
+
+
+
+    <select id="selectPaiChanHao" resultType="schedulingplan">
+        select s.plan_empno planEmpno FROM schedulingplan s
+            INNER JOIN dingdan d ON d.id=s.dingdan_id WHERE s.dingdan_id=#{dingdanId}
+    </select>
+
+
+
+    <select id="selectPiCiHao" resultType="batch">
+        select batch_empno batchEmpno,batch_name batchName from batch where batch_id=#{id}
+    </select>
+
+
+
+    <select id="selectProduct" resultType="product">
+        select
+            p.id pId,pd.id,p.product_size productSize,p.testunit,p.product_name productName,pd.production_num productionNum
+        FROM productioninformation pd
+        INNER JOIN dingdaninfo ddi
+        INNER JOIN product p
+        INNER JOIN batch b
+
+        ON pd.dingdaninfo_id=ddi.id AND
+            pd.id=p.production_id AND
+            pd.productioninformation_id=b.id
+        where b.id=#{id}
+    </select>
+
+
+    <select id="selectFollowUp" resultType="followup">
+        SELECT *from followup WHERE followup_id=#{id}
+    </select>
+
+
+    <select id="selectZongTuiJian" resultType="XiaoShuo">
+        SELECT *from novel LIMIT 0,20
+    </select>
+
+    <select id="FirstClassify" resultType="XiaoShuo">
+        SELECT *from novel AS n ORDER BY n.Recommend DESC  LIMIT 0,20
+    </select>
+    <select id="SecondClassify" resultType="XiaoShuo">
+        SELECT *from novel AS n ORDER BY n.TotalClick DESC  LIMIT 0,20
+    </select>
+    <select id="ThirdClassify" resultType="XiaoShuo">
+        SELECT *from novel AS n ORDER BY n.WeeklyRecommendation DESC  LIMIT 0,20
+    </select>
+
+</mapper>

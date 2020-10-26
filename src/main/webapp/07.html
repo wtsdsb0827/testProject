@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>动态表单</title>
+    <script src="${pageContext.request.contextPath}/static/vue/vue.js"></script>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/element/index.css">
+    <script src="${pageContext.request.contextPath}/static/element/index.js"></script>
+    <script src="${pageContext.request.contextPath}/static/axios/axios.js"></script>
+
+</head>
+<body>
+
+<style>
+    table{text-align:center;width: 80%}
+    tr{ padding: 5px;}
+    td{padding: 10px;}
+</style>
+
+
+<div id="app">
+
+    <el-row>
+        <el-col :span="24">
+            <div>
+                <p>
+                    <el-button type="primary" round @click="addRow">主要按钮</el-button>
+                </p>
+
+                <table >
+                    <tr>
+                        <td>产品规格</td>
+                        <td>数量</td>
+                        <td>交货日期</td>
+                        <td>操作</td>
+
+                    </tr>
+
+
+                    <tr v-for="row in orderItems">
+                        <td>
+                            <el-select v-model="row.productType">
+                                <el-option key="1" value="规格1">规格1</el-option>
+                                <el-option key="2" value="规格2">规格2</el-option>
+                                <el-option key="3" value="规格3">规格3</el-option>
+                                <el-option key="4" value="规格4">规格4</el-option>
+                            </el-select>
+                        </td>
+                        <td>
+                            <!--<el-input-number v-model="row.num"  :min="1" :max="100" label="描述文字">
+
+                            </el-input-number> 吨-->
+
+                            <el-input v-model="row.num">
+                                <template slot="append">吨</template>
+                            </el-input>
+
+                        </td>
+                        <td>
+
+                            <el-date-picker
+                                    v-model="row.date"
+                                    type="date"
+                                    placeholder="选择日期">
+                            </el-date-picker>
+                        </td>
+
+                        <td>
+                            <el-button type="primary" round @click="deleteRow(row)">删除</el-button>
+                        </td>
+                    </tr>
+
+                </table>
+
+            </div>
+        </el-col>
+    </el-row>
+
+
+
+
+</div>
+
+
+
+<script>
+
+
+
+    new Vue({
+        el: '#app',
+
+        methods: {
+            addRow: function(){
+                var a = {};
+                a.productType='规格3';
+                a.num = '';
+                a.date = new Date();
+                this.orderItems.push(a);
+            },
+
+            deleteRow(row){
+                console.log(row);
+                console.log(this.orderItems.indexOf(row));
+
+                var start = this.orderItems.indexOf(row);
+                // this.orderItems.indexOf(row);
+                this.orderItems.splice(start,1);
+            }
+
+        },
+
+        data() {
+            return {
+
+                orderItems: []
+            }
+        }
+    });
+</script>
+
+
+</body>
+</html>
